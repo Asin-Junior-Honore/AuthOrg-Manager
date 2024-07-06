@@ -1,0 +1,182 @@
+const { Organisation, User, UserOrganisation } = require("../models");
+
+const {
+  createOrganisationSchema,
+} = require("../validations/organisationValidation");
+
+class OrganisationController {
+ 
+  static async getOrganisations(req, res) {
+    const { userId } = req.user;
+  
+    try {
+      // Fetch organisations where the user is added (UserOrganisations)
+      const userOrganisations = await Organisation.findAll({
+        include: [
+          {
+            model: UserOrganisation,
+            as: 'UserOrganisations',
+            where: { userId },
+          },
+        ],
+      });
+  
+      // Fetch organisation created by the user (CreatorOrganisation)
+      const creatorOrganisation = await Organisation.findOne({
+        where: { UserId: userId },
+      });
+  
+      // If creatorOrganisation exists, it should be added to userOrganisations array
+      if (creatorOrganisation) {
+        userOrganisations.push(creatorOrganisation);
+      }
+  
+      res.status(200).json({
+        status: 'success',
+        message: 'Organisations fetched',
+        data: {
+          organisations: userOrganisations,
+        },
+      });
+    } catch (error) {
+      console.error('Error fetching organisations:', error);
+      res.status(500).json({
+        status: 'Error',
+        message: 'Server error',
+        statusCode: 500,
+      });
+    }
+  }
+  
+  
+
+  static async createOrganisation(req, res) {
+    const { error } = createOrganisationSchema.validate(req.body);
+    if (error) {
+      return res.status(422).json({
+        errors: error.details.map((detail) => ({
+          field: detail.context.key,
+          message: detail.message,
+        })),
+      });
+    }
+
+    const { name, description } = req.body;
+    const { userId } = req.user;
+    try {
+      const organisation = await Organisation.create({
+        name,
+        description,
+        UserId: userId, // Associate the organisation with the user
+      });
+      res.status(201).json({
+        status: "success",
+        message: "Organisation created successfully",
+        data: { orgId: organisation.orgId, name, description },
+      });
+    } catch (error) {
+      console.error("Error creating organisation:", error);
+      res.status(400).json({
+        status: "Bad Request",
+        message: "Client error",
+        statusCode: 400,
+      });
+    }
+  }
+
+  static async getOrganisationById(req, res) {
+    const { orgId } = req.params;
+    const { userId } = req.user;
+
+    try {
+      const organisation = await Organisation.findByPk(orgId, {
+        include: { association: "Creator" },
+      });
+
+      if (!organisation) {
+        return res.status(404).json({
+          status: "Not found",
+          message: "Organisation not found",
+          statusCode: 404,
+        });
+      }
+
+      if (organisation.UserId !== userId) {
+        return res.status(403).json({
+          status: "Forbidden",
+          message: "You are not authorized to access this organisation",
+          statusCode: 403,
+        });
+      }
+
+      res.status(200).json({
+        status: "Success",
+        message: "Organisation data fetched successfully",
+        data: {
+          organisation: {
+            orgId: organisation.orgId,
+            name: organisation.name,
+            description: organisation.description,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching organisation data:", error);
+      res.status(500).json({
+        status: "Error",
+        message: "Server error",
+        statusCode: 500,
+      });
+    }
+  }
+
+  static async addUserToOrganisation(req, res) {
+    const { orgId } = req.params;
+    const { userId } = req.body;
+
+    try {
+      const organisation = await Organisation.findByPk(orgId);
+      if (!organisation) {
+        return res.status(404).json({
+          status: "Not found",
+          message: "Organisation not found",
+          statusCode: 404,
+        });
+      }
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({
+          status: "Not found",
+          message: "User not found",
+          statusCode: 404,
+        });
+      }
+
+      const isUserAlreadyInOrganisation = await organisation.hasUser(user);
+      if (isUserAlreadyInOrganisation) {
+        return res.status(400).json({
+          status: "Bad request",
+          message: "User is already part of the organisation",
+          statusCode: 400,
+        });
+      }
+
+      await organisation.addUser(user);
+
+      res.status(200).json({
+        status: "success",
+        message: "User added to organisation successfully",
+      });
+    } catch (error) {
+      console.error("Error adding user to organisation:", error);
+      res.status(500).json({
+        status: "Error",
+        message: "Server error",
+        statusCode: 500,
+      });
+    }
+  }
+}
+
+module.exports = OrganisationController;
