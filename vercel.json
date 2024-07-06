@@ -6,10 +6,21 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/app.js"
+  "routes": [{ "src": "/(.*)", "dest": "/app.js" }],
+  "env": {
+    "DB_NAME": "@DB_NAME",
+    "DB_USER": "@DB_USER",
+    "DB_PASSWORD": "@DB_PASSWORD",
+    "DB_HOST": "@DB_HOST"
+  },
+  "build": {
+    "env": {
+      "PG_VERSION": "8.6.0"
+    },
+    "functions": {
+      "api/**/*.{js,ts}": {
+        "runtime": "@vercel/node"
+      }
     }
-  ]
+  }
 }
