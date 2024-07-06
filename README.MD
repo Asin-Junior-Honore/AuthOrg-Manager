@@ -272,14 +272,6 @@ To run tests, use the following command:
 npm test
 ```
 
-## Contributing
-
-We welcome contributions from the community! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to get involved.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
-
+## Happy coding ✌️
 ---
 
-This README provides a comprehensive overview of AuthOrg Manager, including installation steps, API documentation, and instructions for running tests. By following this guide, developers can quickly get started with the application and understand its core functionalities.
