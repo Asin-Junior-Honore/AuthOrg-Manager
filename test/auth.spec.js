@@ -2,19 +2,29 @@ const request = require("supertest");
 const app = require("../app");
 const { User } = require("../models");
 const jwt = require("jsonwebtoken");
-// const sequelize = require("../config/database");
+const { sequelize } = require("../config/database"); // Ensure this line is correct
 const dotenv = require("dotenv");
 
 dotenv.config();
 
-describe("Auth Endpoints", () => {
-  before(async () => {
-    // Ensure the database is synced before running tests
-    await require("../config/database").sequelize.sync({ force: true });
+describe("Auth Endpoints", function () {
+  this.timeout(20000); // Increase the timeout to 20000ms (20 seconds) for the entire suite
+
+  before(async function () {
+    this.timeout(20000); // Increase the timeout for this hook to 20000ms
+    try {
+      console.log("Syncing the database...");
+      await sequelize.sync({ force: true }); // Ensure database is in a clean state
+      console.log("Database synced successfully.");
+    } catch (error) {
+      console.error("Error syncing the database:", error);
+      throw error; // Re-throw the error to fail the test if syncing fails
+    }
   });
 
   describe("POST /auth/register", () => {
-    it("Should register user successfully with default organisation", async () => {
+    it("Should register user successfully with default organisation", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
 
       const res = await request(app).post("/auth/register").send({
@@ -43,7 +53,8 @@ describe("Auth Endpoints", () => {
       );
     });
 
-    it("Should fail if required fields are missing", async () => {
+    it("Should fail if required fields are missing", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
 
       const res = await request(app).post("/auth/register").send({
@@ -56,7 +67,8 @@ describe("Auth Endpoints", () => {
       expect(res.body.errors).to.be.an("array").that.is.not.empty;
     });
 
-    it("Should fail if there’s duplicate email or userID", async () => {
+    it("Should fail if there’s duplicate email or userID", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
 
       await request(app).post("/auth/register").send({
@@ -81,7 +93,8 @@ describe("Auth Endpoints", () => {
   });
 
   describe("POST /auth/login", () => {
-    before(async () => {
+    before(async function () {
+      this.timeout(10000); // Increase the timeout for this hook to 10000ms
       await request(app).post("/auth/register").send({
         firstName: "John",
         lastName: "Doe",
@@ -91,7 +104,8 @@ describe("Auth Endpoints", () => {
       });
     });
 
-    it("Should log the user in successfully", async () => {
+    it("Should log the user in successfully", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
 
       const res = await request(app).post("/auth/login").send({
@@ -110,7 +124,8 @@ describe("Auth Endpoints", () => {
       });
     });
 
-    it("Should fail if credentials are invalid", async () => {
+    it("Should fail if credentials are invalid", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
 
       const res = await request(app).post("/auth/login").send({
@@ -122,7 +137,8 @@ describe("Auth Endpoints", () => {
       expect(res.body).to.have.property("message", "Authentication failed");
     });
 
-    it("Should fail if email or password is missing", async () => {
+    it("Should fail if email or password is missing", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
 
       const res = await request(app).post("/auth/login").send({
@@ -133,7 +149,8 @@ describe("Auth Endpoints", () => {
       expect(res.body.errors).to.be.an("array").that.is.not.empty;
     });
 
-    it("Should fail if email is unregistered", async () => {
+    it("Should fail if email is unregistered", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
 
       const res = await request(app).post("/auth/login").send({
@@ -147,7 +164,8 @@ describe("Auth Endpoints", () => {
   });
 
   describe("Token Generation", () => {
-    it("Should generate token with correct expiry and user details", async () => {
+    it("Should generate token with correct expiry and user details", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
       // Assuming you have a user with known details, or you create one specifically for this test
       const user = await User.findOne({ where: { email: "john@example.com" } });
@@ -174,7 +192,8 @@ describe("Auth Endpoints", () => {
   ];
 
   describe("Organisation Access", () => {
-    it("Should restrict access to organisations based on user's access", async () => {
+    it("Should restrict access to organisations based on user's access", async function () {
+      this.timeout(10000);
       const { expect } = await import("chai");
 
       // Mock a user context

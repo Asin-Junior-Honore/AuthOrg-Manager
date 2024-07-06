@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const sequelize = require("./config/database");
+const { sequelize } = require("./config/database");
 const routes = require("./routes");
 const dotenv = require("dotenv");
 
@@ -17,7 +17,4 @@ sequelize.sync().then(() => {
   });
 });
 
-
-
-// Export the app instance
 module.exports = app;
