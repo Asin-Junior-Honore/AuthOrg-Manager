@@ -9,7 +9,7 @@ dotenv.config();
 
 describe("Auth Endpoints", () => {
   before(async () => {
-    await sequelize.sync();
+    await sequelize.sync()
   });
 
   describe("POST /auth/register", () => {
