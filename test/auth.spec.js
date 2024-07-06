@@ -1,15 +1,16 @@
 const request = require("supertest");
 const app = require("../app");
-const {  User } = require("../models");
+const { User } = require("../models");
 const jwt = require("jsonwebtoken");
-const sequelize =require('../config/database')
+// const sequelize = require("../config/database");
 const dotenv = require("dotenv");
 
 dotenv.config();
 
 describe("Auth Endpoints", () => {
   before(async () => {
-    await sequelize.sync();
+    // Ensure the database is synced before running tests
+    await require("../config/database").sequelize.sync({ force: true });
   });
 
   describe("POST /auth/register", () => {
