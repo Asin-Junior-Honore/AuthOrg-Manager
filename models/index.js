@@ -3,7 +3,7 @@ const User = require("../models/user");
 const Organisation = require("../models/organisation");
 const UserOrganisation = require("../models/userOrganisation");
 
-// Define associations
+
 User.hasMany(UserOrganisation, {
   foreignKey: "userId",
   as: "UserOrganisations",
@@ -12,7 +12,7 @@ UserOrganisation.belongsTo(User, { foreignKey: "userId" });
 
 Organisation.hasMany(UserOrganisation, {
   foreignKey: "orgId",
-  as: "UserOrganisations", // Ensure this matches the alias used in UserOrganisation.belongsTo(Organisation, { foreignKey: "orgId" });
+  as: "UserOrganisations",
 });
 UserOrganisation.belongsTo(Organisation, { foreignKey: "orgId" });
 

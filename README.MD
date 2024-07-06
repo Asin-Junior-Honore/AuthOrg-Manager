@@ -1,8 +1,4 @@
-## Suggested Name
 
-**AuthOrg Manager**
-
-## README
 
 # AuthOrg Manager
 

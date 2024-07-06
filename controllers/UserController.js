@@ -11,9 +11,9 @@ class UserController {
       if (id === userId) {
         user = await User.findByPk(userId);
       } else {
-        // Implement additional logic to check permissions, if necessary
+        // Implement additional logic to check permissions
         user = await User.findByPk(id, {
-          include: { model: Organisation }, // Adjust conditions as needed
+          include: { model: Organisation },
         });
       }
 

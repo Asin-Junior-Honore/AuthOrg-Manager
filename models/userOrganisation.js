@@ -7,7 +7,7 @@ const UserOrganisation = sequelize.define("UserOrganisation", {
     allowNull: false,
     primaryKey: true,
     references: {
-      model: 'User', // Specify the model name as a string
+      model: 'User',
       key: "userId",
     },
   },
@@ -16,7 +16,7 @@ const UserOrganisation = sequelize.define("UserOrganisation", {
     allowNull: false,
     primaryKey: true,
     references: {
-      model: 'Organisation', // Specify the model name as a string
+      model: 'Organisation',
       key: "orgId",
     },
   },
