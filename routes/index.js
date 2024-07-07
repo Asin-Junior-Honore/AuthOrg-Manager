@@ -10,21 +10,32 @@ const router = express.Router();
 router.post("/auth/register", AuthController.register);
 router.post("/auth/login", AuthController.login);
 
-// Protected routes group
-router.use(AuthMiddleware.authenticate);
-
 // User routes
-router.get("/api/users/:id", UserController.getUserById);
+router.get(
+  "/api/users/:id",
+  AuthMiddleware.authenticate,
+  UserController.getUserById
+);
 
 // Organisation routes
-router.get("/api/organisations", OrganisationController.getOrganisations);
-router.post("/api/organisations", OrganisationController.createOrganisation);
+router.get(
+  "/api/organisations",
+  AuthMiddleware.authenticate,
+  OrganisationController.getOrganisations
+);
+router.post(
+  "/api/organisations",
+  AuthMiddleware.authenticate,
+  OrganisationController.createOrganisation
+);
 router.get(
   "/api/organisations/:orgId",
+  AuthMiddleware.authenticate,
   OrganisationController.getOrganisationById
 );
 router.post(
   "/api/organisations/:orgId/users",
+  AuthMiddleware.authenticate,
   OrganisationController.addUserToOrganisation
 );
 
