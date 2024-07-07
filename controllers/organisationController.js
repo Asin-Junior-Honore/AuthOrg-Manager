@@ -5,50 +5,62 @@ const {
 } = require("../validations/organisationValidation");
 
 class OrganisationController {
- 
   static async getOrganisations(req, res) {
     const { userId } = req.user;
-  
+
     try {
-      // Fetch organisations where the user is added (UserOrganisations)
+      // Fetch the user details based on userId to get the firstName
+      const user = await User.findOne({
+        where: { userId },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          status: "Error",
+          message: "User not found",
+          statusCode: 404,
+        });
+      }
+
+      const firstName = user.firstName;
+
+      console.log(
+        `Fetching organisations for user with firstName: ${firstName}`
+      );
+
+      // Fetch organisations where the user is added based on firstName
       const userOrganisations = await Organisation.findAll({
         include: [
           {
             model: UserOrganisation,
-            as: 'UserOrganisations',
-            where: { userId },
+            as: "UserOrganisations",
+            include: [
+              {
+                model: User,
+                as: "User", // Include the User model to filter by firstName
+                where: { firstName },
+              },
+            ],
           },
         ],
       });
-  
-      // Fetch organisation created by the user (CreatorOrganisation)
-      const creatorOrganisation = await Organisation.findOne({
-        where: { UserId: userId },
-      });
-  
-      // If creatorOrganisation exists, it should be added to userOrganisations array
-      if (creatorOrganisation) {
-        userOrganisations.push(creatorOrganisation);
-      }
-  
+
       res.status(200).json({
-        status: 'success',
-        message: 'Organisations fetched',
+        status: "success",
+        message: "Organisations fetched",
         data: {
           organisations: userOrganisations,
         },
       });
     } catch (error) {
-      console.error('Error fetching organisations:', error);
+      console.error("Error fetching organisations:", error);
       res.status(500).json({
-        status: 'Error',
-        message: 'Server error',
+        status: "Error",
+        message: "Server error",
         statusCode: 500,
       });
     }
   }
-  
-  
 
   static async createOrganisation(req, res) {
     const { error } = createOrganisationSchema.validate(req.body);

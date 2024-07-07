@@ -29,6 +29,16 @@ class AuthController {
         });
       }
 
+      // Check if user already exists with the same firstName
+      const existingFirstName = await User.findOne({ where: { firstName } });
+      if (existingFirstName) {
+        return res.status(422).json({
+          errors: [
+            { field: "firstName", message: "First name is already taken" },
+          ],
+        });
+      }
+
       const user = await User.create({
         firstName,
         lastName,
@@ -59,7 +69,11 @@ class AuthController {
             lastName,
             email,
             phone,
-            organisation,
+            organisation: {
+              orgId: organisation.orgId,
+              name: organisation.name,
+              description: organisation.description,
+            },
           },
         },
       });
