@@ -98,11 +98,17 @@ class OrganisationController {
 
   static async getOrganisationById(req, res) {
     const { orgId } = req.params;
-    const { userId } = req.user;
 
     try {
-      const organisation = await Organisation.findByPk(orgId, {
-        include: { association: "Creator" },
+      // Fetch the organization by orgId and ensure it belongs to the current user
+      const organisation = await Organisation.findOne({
+        where: { orgId },
+        include: [
+          {
+            model: UserOrganisation,
+            as: "UserOrganisations",
+          },
+        ],
       });
 
       if (!organisation) {
@@ -110,14 +116,6 @@ class OrganisationController {
           status: "Not found",
           message: "Organisation not found",
           statusCode: 404,
-        });
-      }
-
-      if (organisation.UserId !== userId) {
-        return res.status(403).json({
-          status: "Forbidden",
-          message: "You are not authorized to access this organisation",
-          statusCode: 403,
         });
       }
 
@@ -129,6 +127,8 @@ class OrganisationController {
             orgId: organisation.orgId,
             name: organisation.name,
             description: organisation.description,
+            createdAt: organisation.createdAt,
+            updatedAt: organisation.updatedAt,
           },
         },
       });
