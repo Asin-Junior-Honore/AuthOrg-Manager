@@ -1,25 +1,18 @@
-const { Organisation, User } = require("../models");
+const { User } = require("../models");
 
 class UserController {
   static async getUserById(req, res) {
     const { id } = req.params;
-    const { userId } = req.user;
 
     try {
-      let user;
-
-      if (id === userId) {
-        user = await User.findByPk(userId);
-      } else {
-        // Implement additional logic to check permissions
-        user = await User.findByPk(id, {
-          include: { model: Organisation },
-        });
-      }
+      // Fetch the user details based on userId
+      const user = await User.findOne({
+        where: { userId: id },
+      });
 
       if (!user) {
         return res.status(404).json({
-          status: "Not found",
+          status: "Error",
           message: "User not found",
           statusCode: 404,
         });
