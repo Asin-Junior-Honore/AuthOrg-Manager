@@ -3,6 +3,7 @@ const { User } = require("../models");
 class UserController {
   static async getUserById(req, res) {
     const { id } = req.params;
+    const requestingUserId = req.user.userId; // Assuming userId is stored in req.user
 
     try {
       // Fetch the user details based on userId
@@ -15,6 +16,15 @@ class UserController {
           status: "Error",
           message: "User not found",
           statusCode: 404,
+        });
+      }
+
+      // Check if the requesting user is the owner of the profile
+      if (requestingUserId !== user.userId) {
+        return res.status(403).json({
+          status: "Error",
+          message: "Unauthorized",
+          statusCode: 403,
         });
       }
 
