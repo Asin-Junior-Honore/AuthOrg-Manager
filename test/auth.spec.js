@@ -11,7 +11,7 @@ describe("Auth Endpoints", function () {
   this.timeout(20000); // Increase the timeout to 20000ms (20 seconds) for the entire suite
 
   before(async function () {
-    this.timeout(20000); // Increase the timeout for this hook to 20000ms
+    this.timeout(20000); // Increase the timeout for this hook to 20000
     try {
       console.log("Syncing the database...");
       await sequelize.sync({ force: true }); // Ensure database is in a clean state
