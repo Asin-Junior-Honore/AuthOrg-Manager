@@ -2,7 +2,7 @@ const request = require("supertest");
 const app = require("../app");
 const { User } = require("../models");
 const jwt = require("jsonwebtoken");
-const { sequelize } = require("../config/database"); // Ensure this line is correct
+const { sequelize } = require("../config/database"); // Ensure this line is correctt
 const dotenv = require("dotenv");
 
 dotenv.config();
