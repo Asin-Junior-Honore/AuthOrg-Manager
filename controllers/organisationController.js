@@ -1,5 +1,6 @@
-const { Organisation, User, UserOrganisation } = require("../models");
-
+const { Organisation, User, UserOrganisation  } = require("../models");
+const Sequelize =require('sequelize')
+const { Op } = Sequelize;
 const {
   createOrganisationSchema,
 } = require("../validations/organisationValidation");
@@ -43,6 +44,12 @@ class OrganisationController {
             ],
           },
         ],
+        where: {
+          name: {
+            // Filter organisations whose name starts with user's firstName
+            [Op.like]: `${firstName}%`,
+          },
+        },
       });
 
       res.status(200).json({
