@@ -269,7 +269,7 @@ describe("Auth Endpoints", function () {
     // Additional test cases here...
   });
 
-  // Additional test suites here...
+
 });
 ```
 
@@ -319,4 +319,5 @@ describe("Auth Endpoints", function () {
 - **API**: Deployed on Vercel
 - **Database**: Hosted on Render.com
 
+# Happy coding ✌️
 ---
