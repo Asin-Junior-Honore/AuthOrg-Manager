@@ -1,5 +1,3 @@
-
-
 # AuthOrg Manager
 
 AuthOrg Manager is a robust backend application designed for managing user authentication and organization management. Built with Node.js, Express, and Sequelize ORM, it offers secure authentication, user registration, and organization management functionalities. The application uses PostgreSQL as its database and is deployed on Vercel (API) and Render.com (database).
@@ -268,8 +266,6 @@ describe("Auth Endpoints", function () {
 
     // Additional test cases here...
   });
-
-
 });
 ```
 
@@ -320,4 +316,5 @@ describe("Auth Endpoints", function () {
 - **Database**: Hosted on Render.com
 
 # Happy coding ✌️
+
 ---
