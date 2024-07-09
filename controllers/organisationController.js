@@ -1,6 +1,5 @@
 const { Organisation, User, UserOrganisation } = require("../models");
 const Sequelize = require("sequelize");
-const { Op } = Sequelize;
 const {
   createOrganisationSchema,
 } = require("../validations/organisationValidation");
