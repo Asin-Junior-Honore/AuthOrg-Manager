@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 
 // Root route
 app.get("/", (req, res) => {
-  res.send("👋 Hello yea go on and explore the app thanks ✌️");
+  res.send("<h1>👋 Hello! Go on and explore the app, thanks ✌️</h1>");
 });
 
 app.use("/", routes);
