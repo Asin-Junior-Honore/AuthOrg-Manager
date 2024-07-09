@@ -1,7 +1,6 @@
 const { sequelize } = require("../config/database");
-// Setup associations
 const User = require("./User");
-const Organisation = require("./Organisation");
+const Organisation = require("./organisation");
 const UserOrganisation = require("./UserOrganisation");
 
 User.belongsToMany(Organisation, {
