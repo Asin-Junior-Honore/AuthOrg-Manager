@@ -10,7 +10,6 @@ const app = express();
 
 app.use(bodyParser.json());
 
-// Root route
 app.get("/", (req, res) => {
   res.send("<h1>👋 Hello! Go on and explore the app, thanks ✌️</h1>");
 });
