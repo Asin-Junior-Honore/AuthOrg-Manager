@@ -2,276 +2,321 @@
 
 # AuthOrg Manager
 
-AuthOrg Manager is a powerful backend application designed to handle user authentication and organization management seamlessly. Built with Node.js, Express, Sequelize ORM, and JWT for authentication, this application provides a robust foundation for managing users and their associated organizations.
+AuthOrg Manager is a robust backend application designed for managing user authentication and organization management. Built with Node.js, Express, and Sequelize ORM, it offers secure authentication, user registration, and organization management functionalities. The application uses PostgreSQL as its database and is deployed on Vercel (API) and Render.com (database).
 
 ## Features
 
-- **User Registration**: Register new users with validation and automatic creation of a default organization.
-- **User Login**: Securely log in users and provide JWT tokens for authenticated access.
-- **Organization Management**: Create and manage organizations, fetch user-associated organizations, and manage organization memberships.
-- **Authentication Middleware**: Protect routes with JWT-based authentication middleware.
+- User Registration and Authentication
+- Organization Management
+- Association of Users with Multiple Organizations
+- JWT-based Authentication Middleware
+- Comprehensive Testing with Mocha, Chai, and Supertest
 
-## Installation
+## Technologies Used
 
-1. **Clone the repository**
+- **Node.js**: JavaScript runtime for building scalable server-side applications.
+- **Express**: Fast, unopinionated, minimalist web framework for Node.js.
+- **Sequelize**: Promise-based Node.js ORM for PostgreSQL.
+- **PostgreSQL**: Powerful, open source object-relational database system.
+- **JWT (JSON Web Tokens)**: Secure token-based authentication.
+- **Mocha, Chai, Supertest**: Testing frameworks and libraries for ensuring application robustness.
 
-```bash
-git clone https://github.com/your-username/auth-org-manager.git
-cd auth-org-manager
-```
+## Deployment
 
-2. **Install dependencies**
+- **API**: Vercel
+- **Database**: Render.com
 
-```bash
-npm install
-```
-
-3. **Environment Variables**
-
-Create a `.env` file in the root directory and add the following environment variables:
-
-```env
-JWT_SECRET=your_jwt_secret
-DATABASE_URL=your_database_url
-```
-
-4. **Database Setup**
-
-Ensure you have PostgreSQL installed and create a database for the application. Update the `DATABASE_URL` in the `.env` file accordingly.
-
-Run migrations to set up the database schema:
-
-```bash
-npx sequelize-cli db:migrate
-```
-
-5. **Start the Application**
-
-```bash
-npm start
-```
-
-The application will be running on `http://localhost:3000`.
-
-## API Endpoints
+## Endpoints
 
 ### Authentication
 
-- **Register**: `POST /auth/register`
+- **POST /auth/register**
 
-  Request Body:
-
-  ```json
-  {
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john@example.com",
-    "password": "password",
-    "phone": "1234567890"
-  }
-  ```
-
-  Response:
-
-  ```json
-  {
-    "status": "success",
-    "message": "Registration successful",
-    "data": {
-      "accessToken": "jwt_token",
-      "user": {
-        "userId": 1,
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "john@example.com",
-        "phone": "1234567890"
-      }
-    }
-  }
-  ```
-
-- **Login**: `POST /auth/login`
-
-  Request Body:
-
-  ```json
-  {
-    "email": "john@example.com",
-    "password": "password"
-  }
-  ```
-
-  Response:
-
-  ```json
-  {
-    "status": "success",
-    "message": "Login successful",
-    "data": {
-      "accessToken": "jwt_token",
-      "user": {
-        "userId": 1,
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "john@example.com",
-        "phone": "1234567890"
-      }
-    }
-  }
-  ```
-
-### Users
-
-- **Get User by ID**: `GET /api/users/:id`
-
-  Headers:
-
-  ```json
-  {
-    "Authorization": "Bearer jwt_token"
-  }
-  ```
-
-  Response:
-
-  ```json
-  {
-    "status": "success",
-    "message": "User data fetched successfully",
-    "data": {
-      "userId": 1,
+  - Registers a new user and creates a default organization.
+  - **Request Body**:
+    ```json
+    {
       "firstName": "John",
       "lastName": "Doe",
       "email": "john@example.com",
+      "password": "password",
       "phone": "1234567890"
     }
-  }
-  ```
-
-### Organizations
-
-- **Get Organizations**: `GET /api/organisations`
-
-  Headers:
-
-  ```json
-  {
-    "Authorization": "Bearer jwt_token"
-  }
-  ```
-
-  Response:
-
-  ```json
-  {
-    "status": "success",
-    "message": "Organisations fetched",
-    "data": {
-      "organisations": [
-        {
-          "orgId": 1,
-          "name": "John's Organisation",
-          "description": ""
+    ```
+  - **Response**:
+    ```json
+    {
+      "status": "success",
+      "message": "Registration successful",
+      "data": {
+        "accessToken": "jwt_token",
+        "user": {
+          "userId": "user_id",
+          "firstName": "John",
+          "lastName": "Doe",
+          "email": "john@example.com",
+          "phone": "1234567890",
+          "organisation": {
+            "orgId": "org_id",
+            "name": "John's Organisation",
+            "description": "This organisation was created by John."
+          }
         }
-      ]
+      }
     }
-  }
-  ```
+    ```
 
-- **Create Organization**: `POST /api/organisations`
+- **POST /auth/login**
+  - Logs in a user and returns an access token.
+  - **Request Body**:
+    ```json
+    {
+      "email": "john@example.com",
+      "password": "password"
+    }
+    ```
+  - **Response**:
+    ```json
+    {
+      "status": "success",
+      "message": "Login successful",
+      "data": {
+        "accessToken": "jwt_token",
+        "user": {
+          "userId": "user_id",
+          "firstName": "John",
+          "lastName": "Doe",
+          "email": "john@example.com",
+          "phone": "1234567890"
+        }
+      }
+    }
+    ```
 
-  Headers:
+### User
 
-  ```json
-  {
-    "Authorization": "Bearer jwt_token"
-  }
-  ```
+- **GET /api/users/:id**
+  - Fetches a user's details by their ID.
+  - **Response**:
+    ```json
+    {
+      "status": "success",
+      "data": {
+        "userId": "user_id",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john@example.com",
+        "phone": "1234567890"
+      }
+    }
+    ```
 
-  Request Body:
+### Organisation
 
-  ```json
-  {
-    "name": "New Organisation",
-    "description": "Description of the new organisation"
-  }
-  ```
+- **GET /api/organisations**
 
-  Response:
+  - Fetches all organizations associated with the authenticated user.
+  - **Response**:
+    ```json
+    {
+      "status": "success",
+      "data": {
+        "organisations": [
+          {
+            "orgId": "org_id",
+            "name": "John's Organisation",
+            "description": "This organisation was created by John."
+          },
+          {
+            "orgId": "another_org_id",
+            "name": "Another Organisation",
+            "description": "This is another organisation."
+          }
+        ]
+      }
+    }
+    ```
 
-  ```json
-  {
-    "status": "success",
-    "message": "Organisation created successfully",
-    "data": {
-      "orgId": 2,
+- **POST /api/organisations**
+
+  - Creates a new organization.
+  - **Request Body**:
+    ```json
+    {
       "name": "New Organisation",
       "description": "Description of the new organisation"
     }
-  }
-  ```
-
-- **Get Organization by ID**: `GET /api/organisations/:orgId`
-
-  Headers:
-
-  ```json
-  {
-    "Authorization": "Bearer jwt_token"
-  }
-  ```
-
-  Response:
-
-  ```json
-  {
-    "status": "success",
-    "message": "Organisation data fetched successfully",
-    "data": {
-      "organisation": {
-        "orgId": 1,
-        "name": "John's Organisation",
-        "description": ""
+    ```
+  - **Response**:
+    ```json
+    {
+      "status": "success",
+      "message": "Organisation created successfully",
+      "data": {
+        "organisation": {
+          "orgId": "org_id",
+          "name": "New Organisation",
+          "description": "Description of the new organisation"
+        }
       }
     }
-  }
-  ```
+    ```
 
-- **Add User to Organization**: `POST /api/organisations/:orgId/users`
+- **GET /api/organisations/:orgId**
 
-  Headers:
+  - Fetches a specific organization by its ID.
+  - **Response**:
+    ```json
+    {
+      "status": "success",
+      "data": {
+        "organisation": {
+          "orgId": "org_id",
+          "name": "Organisation Name",
+          "description": "Organisation description"
+        }
+      }
+    }
+    ```
 
-  ```json
-  {
-    "Authorization": "Bearer jwt_token"
-  }
-  ```
+- **POST /api/organisations/:orgId/users**
+  - Adds a user to a specific organization.
+  - **Request Body**:
+    ```json
+    {
+      "userId": "user_id"
+    }
+    ```
+  - **Response**:
+    ```json
+    {
+      "status": "success",
+      "message": "User added to organisation successfully",
+      "data": {
+        "organisation": {
+          "orgId": "org_id",
+          "name": "Organisation Name",
+          "description": "Organisation description"
+        }
+      }
+    }
+    ```
 
-  Request Body:
+## Testing
 
-  ```json
-  {
-    "userId": 2
-  }
-  ```
+The application includes comprehensive tests covering various scenarios, including user registration, login, and organization management. Tests are written using Mocha, Chai, and Supertest.
 
-  Response:
+### Running Tests
 
-  ```json
-  {
-    "status": "success",
-    "message": "User added to organisation successfully"
-  }
-  ```
-
-## Running Tests
-
-To run tests, use the following command:
+To run the tests, use the following command:
 
 ```bash
 npm test
 ```
 
-## Happy coding ✌️
----
+### Sample Test Code
 
+```javascript
+const request = require("supertest");
+const app = require("../app");
+const { User } = require("../models");
+const jwt = require("jsonwebtoken");
+const { sequelize } = require("../config/database");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
+describe("Auth Endpoints", function () {
+  this.timeout(20000);
+
+  before(async function () {
+    this.timeout(20000);
+    try {
+      await sequelize.sync({ force: true });
+    } catch (error) {
+      throw error;
+    }
+  });
+
+  describe("POST /auth/register", () => {
+    it("Should register user successfully with default organisation", async function () {
+      const { expect } = await import("chai");
+      const res = await request(app).post("/auth/register").send({
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+        password: "password",
+        phone: "1234567890",
+      });
+
+      expect(res.status).to.equal(201);
+      expect(res.body).to.have.property("status", "success");
+      expect(res.body.data).to.have.property("accessToken");
+      expect(res.body.data.user).to.include({
+        firstName: "John",
+        lastName: "Doe",
+        email: "john@example.com",
+        phone: "1234567890",
+      });
+
+      expect(res.body.data.user.organisation).to.be.an("object");
+      expect(res.body.data.user.organisation).to.have.property(
+        "name",
+        "John's Organisation"
+      );
+    });
+
+    // Additional test cases here...
+  });
+
+  // Additional test suites here...
+});
+```
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js
+- PostgreSQL
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/your-repo/authorg-manager.git
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   cd authorg-manager
+   npm install
+   ```
+
+3. Configure environment variables by creating a `.env` file:
+
+   ```bash
+   JWT_SECRET=your_jwt_secret
+   DATABASE_URL=your_database_url
+   ```
+
+4. Run database migrations:
+
+   ```bash
+   npx sequelize-cli db:migrate
+   ```
+
+5. Start the server:
+   ```bash
+   npm start
+   ```
+
+### Deployment
+
+- **API**: Deployed on Vercel
+- **Database**: Hosted on Render.com
+
+---
