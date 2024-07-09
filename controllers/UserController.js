@@ -3,7 +3,7 @@ const { User } = require("../models");
 class UserController {
   static async getUserById(req, res) {
     const { id } = req.params;
-    const requestingUserId = req.user.userId; 
+    const requestingUserId = req.user.userId;
 
     try {
       // Fetch the user details based on userId

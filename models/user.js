@@ -22,7 +22,7 @@ const User = sequelize.define("User", {
     allowNull: false,
     unique: true,
     validate: {
-      isEmail: true, // Ensure the email format is valid
+      isEmail: true,
     },
   },
   password: {
@@ -34,7 +34,6 @@ const User = sequelize.define("User", {
   },
 });
 
-// Hash password before saving
 User.beforeCreate(async (user) => {
   user.password = await bcrypt.hash(user.password, 10);
 });

@@ -1,5 +1,5 @@
-const { Organisation, User, UserOrganisation  } = require("../models");
-const Sequelize =require('sequelize')
+const { Organisation, User, UserOrganisation } = require("../models");
+const Sequelize = require("sequelize");
 const { Op } = Sequelize;
 const {
   createOrganisationSchema,
@@ -7,64 +7,44 @@ const {
 
 class OrganisationController {
   static async getOrganisations(req, res) {
-    const { userId } = req.user;
-
     try {
-      // Fetch the user details based on userId to get the firstName
-      const user = await User.findOne({
-        where: { userId },
+      const { userId } = req.user;
+
+      // Find all organizations the user is a member of or has created
+      const organisations = await Organisation.findAll({
+        where: {
+          [Sequelize.Op.or]: [{ UserId: userId }, { "$Users.userId$": userId }],
+        },
+        include: [
+          {
+            model: User,
+            as: "Creator",
+            attributes: ["userId", "firstName", "lastName", "email", "phone"],
+          },
+          {
+            model: User,
+            through: { attributes: [] }, // To avoid including the join table attributes
+            attributes: ["userId", "firstName", "lastName", "email", "phone"],
+          },
+        ],
       });
 
-      if (!user) {
+      if (!organisations || organisations.length === 0) {
         return res.status(404).json({
-          status: "Error",
-          message: "User not found",
-          statusCode: 404,
+          status: "error",
+          message: "No organisations found",
         });
       }
 
-      const firstName = user.firstName;
-
-      console.log(
-        `Fetching organisations for user with firstName: ${firstName}`
-      );
-
-      // Fetch organisations where the user is added based on firstName
-      const userOrganisations = await Organisation.findAll({
-        include: [
-          {
-            model: UserOrganisation,
-            as: "UserOrganisations",
-            include: [
-              {
-                model: User,
-                as: "User", // Include the User model to filter by firstName
-                where: { firstName },
-              },
-            ],
-          },
-        ],
-        where: {
-          name: {
-            // Filter organisations whose name starts with user's firstName
-            [Op.like]: `${firstName}%`,
-          },
-        },
-      });
-
       res.status(200).json({
         status: "success",
-        message: "Organisations fetched",
-        data: {
-          organisations: userOrganisations,
-        },
+        data: organisations,
       });
     } catch (error) {
-      console.error("Error fetching organisations:", error);
+      console.error("Error fetching user's organisations:", error);
       res.status(500).json({
-        status: "Error",
-        message: "Server error",
-        statusCode: 500,
+        status: "error",
+        message: "Internal server error",
       });
     }
   }
@@ -73,6 +53,8 @@ class OrganisationController {
     const { error } = createOrganisationSchema.validate(req.body);
     if (error) {
       return res.status(422).json({
+        status: "error",
+        message: "Validation error",
         errors: error.details.map((detail) => ({
           field: detail.context.key,
           message: detail.message,
@@ -82,23 +64,26 @@ class OrganisationController {
 
     const { name, description } = req.body;
     const { userId } = req.user;
+
     try {
       const organisation = await Organisation.create({
         name,
         description,
-        UserId: userId, // Associate the organisation with the user
+        UserId: userId,
       });
+
       res.status(201).json({
         status: "success",
         message: "Organisation created successfully",
-        data: { orgId: organisation.orgId, name, description },
+        data: {
+          organisation,
+        },
       });
     } catch (error) {
       console.error("Error creating organisation:", error);
-      res.status(400).json({
-        status: "Bad Request",
-        message: "Client error",
-        statusCode: 400,
+      res.status(500).json({
+        status: "error",
+        message: "Internal server error",
       });
     }
   }
@@ -107,92 +92,89 @@ class OrganisationController {
     const { orgId } = req.params;
 
     try {
-      // Fetch the organization by orgId and ensure it belongs to the current user
       const organisation = await Organisation.findOne({
         where: { orgId },
-        include: [
-          {
-            model: UserOrganisation,
-            as: "UserOrganisations",
-          },
-        ],
       });
 
       if (!organisation) {
         return res.status(404).json({
-          status: "Not found",
+          status: "error",
           message: "Organisation not found",
-          statusCode: 404,
         });
       }
 
+      // Ensure the user has access to this organisation (optional)
+
       res.status(200).json({
-        status: "Success",
-        message: "Organisation data fetched successfully",
+        status: "success",
         data: {
-          organisation: {
-            orgId: organisation.orgId,
-            name: organisation.name,
-            description: organisation.description,
-            createdAt: organisation.createdAt,
-            updatedAt: organisation.updatedAt,
-          },
+          organisation,
         },
       });
     } catch (error) {
-      console.error("Error fetching organisation data:", error);
+      console.error("Error fetching organisation:", error);
       res.status(500).json({
-        status: "Error",
-        message: "Server error",
-        statusCode: 500,
+        status: "error",
+        message: "Internal server error",
       });
     }
   }
 
   static async addUserToOrganisation(req, res) {
+    const { userId: currentUserId } = req.user;
     const { orgId } = req.params;
-    const { userId } = req.body;
+    const { userId: userToAddId } = req.body;
 
     try {
-      const organisation = await Organisation.findByPk(orgId);
+      // Check if the organization exists and belongs to the current user
+      const organisation = await Organisation.findOne({
+        where: { orgId, UserId: currentUserId },
+      });
+
       if (!organisation) {
         return res.status(404).json({
-          status: "Not found",
-          message: "Organisation not found",
-          statusCode: 404,
+          status: "error",
+          message: "Organisation not found or you do not have access",
         });
       }
 
-      const user = await User.findByPk(userId);
-      if (!user) {
+      // Find the user to be added by userId
+      const userToAdd = await User.findOne({ where: { userId: userToAddId } });
+
+      if (!userToAdd) {
         return res.status(404).json({
-          status: "Not found",
-          message: "User not found",
-          statusCode: 404,
+          status: "error",
+          message: "User to be added not found",
         });
       }
 
-      const isUserAlreadyInOrganisation = await organisation.hasUser(user);
-      if (isUserAlreadyInOrganisation) {
+      // Check if the user is already part of the organization
+      const existingMembership = await UserOrganisation.findOne({
+        where: { userId: userToAdd.userId, orgId },
+      });
+
+      if (existingMembership) {
         return res.status(400).json({
-          status: "Bad request",
-          message: "User is already part of the organisation",
-          statusCode: 400,
+          status: "error",
+          message: "User is already a member of this organisation",
         });
       }
 
-      await organisation.addUser(user);
+      // Add the user to the organization
+      await UserOrganisation.create({
+        userId: userToAdd.userId,
+        orgId,
+      });
 
-      res.status(200).json({
+      res.status(201).json({
         status: "success",
         message: "User added to organisation successfully",
       });
     } catch (error) {
       console.error("Error adding user to organisation:", error);
       res.status(500).json({
-        status: "Error",
-        message: "Server error",
-        statusCode: 500,
+        status: "error",
+        message: "Internal server error",
       });
     }
   }

@@ -48,9 +48,11 @@ class AuthController {
       });
 
       const orgName = `${firstName}'s Organisation`;
+      const orgDescription = `This organisation was created by ${firstName}.`;
+
       const organisation = await Organisation.create({
         name: orgName,
-        description: "",
+        description: orgDescription,
         UserId: user.userId,
       });
 
